@@ -107,6 +107,30 @@
         cursor: pointer;
       }
       body.running.unfocused #focusHint { display: block; }
+
+      /* Result upload: shown over the canvas at the end of the session. */
+      #upload {
+        display: none;
+        position: fixed;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, .75);
+      }
+      #upload.shown { display: flex; }
+      #uploadBox {
+        max-width: 32rem;
+        margin: 1rem;
+        padding: 1.5rem 2rem;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        text-align: center;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      #uploadBox.ok { border-color: #3c8a4a; }
+      #uploadBox.fail { border-color: #a04848; }
     </style>
   </head>
   <body>
@@ -126,17 +150,16 @@
         (environ 6&nbsp;minutes).</p>
 
       <div class="field">
-        <label for="prenom">Prénom</label>
-        <input id="prenom" type="text" autocomplete="given-name" />
-        <label for="nom">Nom</label>
-        <input id="nom" type="text" autocomplete="family-name" />
+        <label for="pseudo">Pseudo</label>
+        <input id="pseudo" type="text" autocomplete="off" maxlength="40" />
+        <label for="age">Âge</label>
+        <input id="age" type="number" min="10" max="99" style="width: 4.5rem" />
       </div>
       <div class="field">
         <button id="start" disabled>Chargement&hellip;</button>
       </div>
-      <p class="sub">Votre nom sert seulement à l'expérimentateur pour savoir qui a
-        participé : il est enregistré dans le fichier d'informations de la session,
-        jamais dans le tableau des résultats.</p>
+      <p class="sub">Choisissez un pseudo (pas votre vrai nom) : les résultats sont
+        anonymes.</p>
 
       <div id="status">Chargement (environ 25&nbsp;Mo, quelques secondes)&hellip;</div>
 
@@ -149,24 +172,24 @@
           (<kbd>F11</kbd>) et ne la redimensionnez plus pendant l'expérience.</li>
         <li>Appuyez sur <kbd>ESPACE</kbd> pour passer chaque écran de consignes.
           Si une touche semble ignorée, cliquez une fois sur l'image.</li>
-        <li>À la fin, le navigateur <strong>télécharge un fichier</strong>
-          <code>Change-Blindness-v2.6_sub-&lt;numéro de session&gt;_date-&hellip;.zip</code> :
-          c'est l'ensemble de vos résultats. Acceptez-le si le navigateur le demande.</li>
-        <li><strong>Envoyez ensuite ce fichier par e-mail à
-          <a href="mailto:justin.verastegui-munoz@polytechnique.edu?subject=R%C3%A9sultats%20Change%20Blindness%20v2.6">justin.verastegui-munoz@polytechnique.edu</a></strong>
-          (il se trouve en général dans votre dossier « Téléchargements »).</li>
+        <li>À la fin, <strong>vos résultats sont envoyés automatiquement</strong> :
+          attendez le message de confirmation avant de fermer la page. Si l'envoi
+          échoue, le navigateur télécharge un fichier <code>.zip</code> à envoyer par
+          e-mail à
+          <a href="mailto:justin.verastegui-munoz@polytechnique.edu?subject=R%C3%A9sultats%20Change%20Blindness%20v2.6">justin.verastegui-munoz@polytechnique.edu</a>.</li>
         <li><kbd>Échap</kbd> arrête l'expérience à tout moment.</li>
       </ul>
     </div>
 
     <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
     <div id="focusHint">Cliquez ici pour redonner le clavier à l'expérience</div>
+    <div id="upload"><div id="uploadBox"></div></div>
 
     <script>
       const canvasElement = document.getElementById('canvas');
       const startButton = document.getElementById('start');
-      const firstNameField = document.getElementById('prenom');
-      const lastNameField = document.getElementById('nom');
+      const pseudoField = document.getElementById('pseudo');
+      const ageField = document.getElementById('age');
       const statusLine = document.getElementById('status');
       const launcher = document.getElementById('launcher');
       const focusHint = document.getElementById('focusHint');
@@ -177,8 +200,8 @@
       }
 
       // The subject ID seeds the draw of photographs and changes. The
-      // participant gives a name; the ID is a random number (or ?s=7 in the
-      // link, for the experimenter).
+      // participant gives a pseudonym and age; the ID is a random number (or
+      // ?s=7 in the link, for the experimenter).
       const linkSubject = new URLSearchParams(location.search).get('s');
 
       // Without cross-origin isolation (GitHub Pages cannot send the headers),
@@ -214,6 +237,108 @@
       }
     </script>
 
+    <script>
+      // ---- Automatic saving of the results (DataPipe -> experimenter's storage)
+      //
+      // At the end of the session goxpyriment packs the results (.csv +
+      // -info.txt) into one .zip and "downloads" it by clicking a hidden link
+      // to a Blob URL (results/output_file_wasm.go). We intercept that click:
+      // the .zip is sent to DataPipe (https://pipe.jspsych.org), which stores
+      // it in the experimenter's storage, and the file is downloaded only if
+      // the upload fails, so the participant can still e-mail it.
+      const DATAPIPE_EXPERIMENT_ID = 'YStuSRC2DN0T';
+      const DATAPIPE_URL = 'https://pipe.jspsych.org/api/base64/';
+      const CONTACT = 'justin.verastegui-munoz@polytechnique.edu';
+      const UPLOAD_TIMEOUT_MS = 30000;
+
+      const uploadLayer = document.getElementById('upload');
+      const uploadBox = document.getElementById('uploadBox');
+      function showUpload(html, kind) {
+        uploadBox.innerHTML = html;
+        uploadBox.className = kind || '';
+        uploadLayer.classList.add('shown');
+      }
+
+      // Keep the Blob behind each object URL: goxpyriment revokes the URL
+      // right after the click, before an asynchronous upload could read it.
+      const blobsByURL = new Map();
+      const originalCreateObjectURL = URL.createObjectURL.bind(URL);
+      URL.createObjectURL = function (obj) {
+        const url = originalCreateObjectURL(obj);
+        if (obj instanceof Blob) blobsByURL.set(url, obj);
+        return url;
+      };
+
+      const originalAnchorClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () {
+        const blob = blobsByURL.get(this.href);
+        if (blob && this.download && this.download.endsWith('.zip')) {
+          saveResults(this.download, blob);
+          return; // downloaded only if the upload fails (see saveResults)
+        }
+        return originalAnchorClick.call(this);
+      };
+
+      function download(filename, blob) {
+        const a = document.createElement('a');
+        a.href = originalCreateObjectURL(blob);
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        originalAnchorClick.call(a);
+        document.body.removeChild(a);
+      }
+
+      function base64Of(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(',')[1]);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      let uploading = false;
+      window.addEventListener('beforeunload', (e) => {
+        if (uploading) { e.preventDefault(); e.returnValue = ''; } // "leave the page?" while sending
+      });
+
+      async function saveResults(filename, blob) {
+        document.body.classList.remove('unfocused');
+        uploading = true;
+        showUpload('Envoi de vos résultats&hellip;<br><small>Ne fermez pas la page.</small>');
+        try {
+          const data = await base64Of(blob);
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), UPLOAD_TIMEOUT_MS);
+          const resp = await fetch(DATAPIPE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: '*/*' },
+            body: JSON.stringify({ experimentID: DATAPIPE_EXPERIMENT_ID, filename, data }),
+            signal: ctrl.signal,
+          });
+          clearTimeout(timer);
+          // 201 = stored; 202 = accepted, DataPipe retries the delivery itself.
+          if (resp.status !== 201 && resp.status !== 202) {
+            let detail = '';
+            try { detail = (await resp.json()).error || ''; } catch (e) { /* not JSON */ }
+            throw new Error('HTTP ' + resp.status + (detail ? ' ' + detail : ''));
+          }
+          showUpload('<strong>✓ Résultats envoyés.</strong><br>Merci beaucoup pour votre ' +
+            'participation ! Vous pouvez fermer la page.', 'ok');
+        } catch (err) {
+          console.error('DataPipe upload failed:', err);
+          download(filename, blob);
+          showUpload('<strong>L’envoi automatique a échoué</strong> (' +
+            String(err.message || err).replace(/[<>&]/g, '') + ').<br>' +
+            'Votre navigateur vient de télécharger <code>' + filename + '</code> : ' +
+            'envoyez ce fichier par e-mail à <a href="mailto:' + CONTACT +
+            '?subject=R%C3%A9sultats%20Change%20Blindness%20v2.6">' + CONTACT + '</a>. Merci !', 'fail');
+        } finally {
+          uploading = false;
+        }
+      }
+    </script>
     <script src="sdl.js"></script>
     <script src="wasm_exec.js"></script>
     <script>
@@ -235,11 +360,16 @@
         });
 
       startButton.addEventListener('click', () => {
-        const prenom = firstNameField.value.trim();
-        const nom = lastNameField.value.trim();
-        if (!prenom || !nom) {
-          setStatus('Entrez votre prénom et votre nom.', true);
-          (prenom ? lastNameField : firstNameField).focus();
+        const pseudo = pseudoField.value.trim();
+        const age = ageField.value.trim();
+        if (!pseudo) {
+          setStatus('Choisissez un pseudo.', true);
+          pseudoField.focus();
+          return;
+        }
+        if (!/^\d+$/.test(age) || +age < 10 || +age > 99) {
+          setStatus('Entrez votre âge (un nombre entre 10 et 99).', true);
+          ageField.focus();
           return;
         }
         const id = /^\d+$/.test(linkSubject || '') ? linkSubject
@@ -249,8 +379,8 @@
         // The Go side reads its flags from location.search at startup.
         const params = new URLSearchParams(location.search);
         params.set('s', id);
-        params.set('prenom', prenom);
-        params.set('nom', nom);
+        params.set('pseudo', pseudo);
+        params.set('age', age);
         history.replaceState(null, '', location.pathname + '?' + params.toString());
 
         document.body.classList.add('running');
@@ -285,7 +415,7 @@
       setInterval(fitCanvas, 500);
       setInterval(trackFocus, 500);
 
-      for (const f of [firstNameField, lastNameField]) {
+      for (const f of [pseudoField, ageField]) {
         f.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' && !startButton.disabled) startButton.click();
         });

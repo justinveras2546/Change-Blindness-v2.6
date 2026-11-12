@@ -70,7 +70,8 @@ var assets embed.FS
 const (
 	expName = "Change-Blindness-v2.6" // window title and data file names
 
-	// contactEmail is where browser participants send their results.
+	// contactEmail is where browser participants e-mail their results when the
+	// automatic upload fails (the page, web/index.html, shows it).
 	contactEmail = "justin.verastegui-munoz@polytechnique.edu"
 	stimDir      = "stimuli"
 
@@ -96,11 +97,11 @@ var (
 	tolerance = flag.Float64("tolerance", 25, "A click within this distance of a changed object (image pixels) finds it")
 	practice  = flag.Bool("practice", true, "Run the practice trials first")
 
-	// The browser page asks for the participant's name; it is recorded in the
-	// session's -info.txt only, never in the .csv (which can be shared), and
-	// the subject ID that seeds the draw is a random number the page picks.
-	lastName  = flag.String("nom", "", "Participant's last name (recorded in the -info.txt only)")
-	firstName = flag.String("prenom", "", "Participant's first name (recorded in the -info.txt only)")
+	// The browser page asks for a pseudonym and the age; both are recorded in
+	// the session's -info.txt. The subject ID that seeds the draw is a random
+	// number the page picks.
+	pseudo = flag.String("pseudo", "", "Participant's pseudonym (recorded in the -info.txt)")
+	age    = flag.String("age", "", "Participant's age in years (recorded in the -info.txt)")
 )
 
 // variant is one row of stimuli/manifest.csv: a version of a scene that
@@ -598,9 +599,9 @@ func showFeedback(exp *control.Experiment, b *stimuli.Picture, masks []*mask, re
 func main() {
 	exp := control.NewExperimentFromFlags(expName, control.Gray, control.White, 28)
 	defer exp.End()
-	if *lastName != "" || *firstName != "" {
-		exp.AddExperimentInfo("participant_nom: " + strings.TrimSpace(*lastName))
-		exp.AddExperimentInfo("participant_prenom: " + strings.TrimSpace(*firstName))
+	if *pseudo != "" || *age != "" {
+		exp.AddExperimentInfo("participant_pseudo: " + strings.TrimSpace(*pseudo))
+		exp.AddExperimentInfo("participant_age: " + strings.TrimSpace(*age))
 	}
 
 	if err := exp.SetLogicalSize(imageW, imageH); err != nil {
@@ -741,12 +742,12 @@ func main() {
 		}
 
 		end := "Expérience terminée.\nMerci pour votre participation !\n\nAppuyez sur ESPACE pour quitter."
-		if runtime.GOOS == "js" { // browser: the results are downloaded when the session ends
+		if runtime.GOOS == "js" { // browser: the page sends the results when the session ends (web/index.html)
 			end = "Expérience terminée. Merci pour votre participation !\n\n" +
-				"Appuyez sur ESPACE : votre navigateur va télécharger\n" +
-				"un fichier .zip qui contient vos résultats.\n\n" +
-				"Envoyez ce fichier par e-mail à\n" + contactEmail + "\n\n" +
-				"(il est en général dans votre dossier Téléchargements)."
+				"Appuyez sur ESPACE : vos résultats vont être\n" +
+				"envoyés automatiquement.\n\n" +
+				"Attendez le message de confirmation\n" +
+				"avant de fermer la page."
 		}
 		if err := exp.ShowInstructions(end); err != nil {
 			return err
