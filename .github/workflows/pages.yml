@@ -46,9 +46,13 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
+      # One artifact name per attempt: "Re-run jobs" re-runs the build inside
+      # the same workflow run, and two artifacts with the same name make
+      # deploy-pages fail ("Multiple artifacts named github-pages").
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+          name: github-pages-${{ github.run_attempt }}
 
   deploy:
     needs: build
@@ -59,3 +63,5 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}

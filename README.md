@@ -181,9 +181,23 @@ go to `build/saliency_overlays/`.
 
 ## Design
 
-- 2 practice scenes, the same for everyone, with feedback (changes found
-  framed in green, missed ones in red), then **40 scenes drawn at random**, in
-  random order, no feedback.
+- 2 practice scenes, with feedback (changes found framed in green, missed
+  ones in red), then **25 scenes** (about 6 minutes) in random order, no
+  feedback.
+- **The 25 scenes are drawn at random for each participant, weighted by how
+  many changes they offer**: weight = changes − 2 (a scene offering 3 changes
+  weighs 1, 5 changes 3, 8 changes 6; weighted draw without replacement). All
+  44 scenes get used, the richer ones more often:
+
+  | Changes offered | Scenes | Shown in (share of sessions) |
+  |---|---|---|
+  | 3 | 11 | 33 % |
+  | 4 | 15 | 55 % |
+  | 5 | 13 | 69 % |
+  | 6–8 | 5 | 82–91 % |
+
+  The 2 practice scenes, the same for everyone, are among those offering the
+  fewest changes (3). `-n` sets how many scenes are drawn.
 - **For each scene, 3 of its variants are drawn at random**, any type, a
   different set for each participant when the scene has more than 3.
 - Whether the original or the changed version comes first in the cycle is
@@ -220,7 +234,7 @@ go run . -w -s 1
 | `-w` | off | Windowed mode |
 | `-d N` | -1 | Display index |
 | `-s N` | — | Subject ID (selects the changes and seeds the draw) |
-| `-n N` | 40 | Scenes per participant |
+| `-n N` | 25 | Scenes per participant |
 | `-max MS` | 15000 | Trial timeout |
 | `-tolerance PX` | 25 | A click within this distance of a changed object finds it |
 | `-practice` | true | Run the practice trials (`-practice=false` to skip) |

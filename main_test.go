@@ -14,7 +14,7 @@ func TestManifestAndDesign(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	const n = 40
+	n := *nTrials // the default session
 	prac1, main1, err := buildTrials(scenes, variants, n, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -30,6 +30,65 @@ func TestManifestAndDesign(t *testing.T) {
 		if prac1[i].scene != prac2[i].scene {
 			t.Errorf("practice scenes differ between subjects: %s vs %s", prac1[i].scene, prac2[i].scene)
 		}
+	}
+
+	// Practice: scenes offering the fewest changes. Main scenes: a weighted
+	// draw, different between subjects, every scene drawn at some point, the
+	// scenes offering more changes more often.
+	fewest := len(variants[scenes[0]])
+	for _, s := range scenes {
+		fewest = min(fewest, len(variants[s]))
+	}
+	for _, tr := range prac1 {
+		if len(variants[tr.scene]) != fewest {
+			t.Errorf("practice scene %s offers %d changes, not the fewest (%d)", tr.scene, len(variants[tr.scene]), fewest)
+		}
+	}
+	const subjects = 400
+	shownCount := map[string]int{}
+	for s := 1; s <= subjects; s++ {
+		_, m, _ := buildTrials(scenes, variants, n, s)
+		for _, tr := range m {
+			shownCount[tr.scene]++
+		}
+	}
+	isPractice := map[string]bool{}
+	for _, tr := range prac1 {
+		isPractice[tr.scene] = true
+	}
+	rate := map[int][]float64{} // changes offered -> share of sessions showing the scene
+	for _, s := range scenes {
+		if isPractice[s] {
+			continue
+		}
+		if shownCount[s] == 0 {
+			t.Errorf("scene %s never drawn in %d sessions", s, subjects)
+		}
+		rate[len(variants[s])] = append(rate[len(variants[s])], float64(shownCount[s])/subjects)
+	}
+	mean := func(xs []float64) float64 {
+		sum := 0.0
+		for _, x := range xs {
+			sum += x
+		}
+		return sum / float64(len(xs))
+	}
+	for k := 3; k <= 8; k++ {
+		if len(rate[k]) > 0 {
+			t.Logf("scenes offering %d changes (%2d): shown in %3.0f %% of sessions", k, len(rate[k]), 100*mean(rate[k]))
+		}
+	}
+	if len(rate[3]) > 0 && len(rate[5]) > 0 && mean(rate[5]) <= mean(rate[3]) {
+		t.Errorf("scenes offering 5 changes are not drawn more often than those offering 3")
+	}
+	same := 0
+	for i := range main1 {
+		if main1[i].scene == main2[i].scene {
+			same++
+		}
+	}
+	if same == len(main1) {
+		t.Error("subjects 1 and 2 got the same scenes in the same order")
 	}
 
 	seen := map[string]bool{}

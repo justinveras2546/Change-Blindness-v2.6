@@ -20,10 +20,12 @@
 // change is found first, second, third (or not at all) ranks the objects of
 // the photograph for attention.
 //
-// Each participant sees 40 scenes drawn at random, in random order, and for
-// each a random set of 3 changes: different participants get different sets.
-// Whether the original or the changed version comes first in the cycle is
-// random. Two scenes, the same for everyone, are kept for practice, with
+// Each participant sees 25 scenes drawn at random, in random order, the
+// scenes offering more changes being drawn more often (see sceneWeight), and
+// for each a random set of 3 changes: different participants get different
+// scenes and sets. Whether the original or the
+// changed version comes first in the cycle is random. Two scenes that offer
+// the fewest changes, the same for everyone, are kept for practice, with
 // feedback. Every draw is seeded by the subject ID, so a session can be
 // reproduced from its ID.
 //
@@ -89,7 +91,7 @@ const (
 )
 
 var (
-	nTrials   = flag.Int("n", 40, "Number of scenes per participant")
+	nTrials   = flag.Int("n", 25, "Number of scenes per participant")
 	maxMs     = flag.Int("max", 15_000, "Maximum duration of a trial (ms)")
 	tolerance = flag.Float64("tolerance", 25, "A click within this distance of a changed object (image pixels) finds it")
 	practice  = flag.Bool("practice", true, "Run the practice trials first")
@@ -180,11 +182,25 @@ func readManifest() (scenes []string, variants map[string][]variant, err error) 
 	return scenes, variants, nil
 }
 
+// sceneWeight is how much more likely a scene is to be drawn: the number of
+// changes it offers beyond the 3 shown (plus one), so a scene offering 3
+// changes weighs 1, 5 changes 3, 8 changes 6. Every scene can be drawn, the
+// scenes offering more changes (more objects measured, more sets of 3) more
+// often.
+func sceneWeight(nVariants int) float64 { return float64(nVariants - nChanges + 1) }
+
 // buildTrials returns the practice trials then n main trials for subject.
+//
+// The nPractice scenes offering the fewest changes (ties in a fixed random
+// order) are the practice, the same for everyone. The n main scenes are drawn
+// at random for each subject among the others, without replacement, each with
+// a probability proportional to sceneWeight (Efraimidis & Spirakis, 2006),
+// and shown in random order with a random set of 3 changes in each.
 func buildTrials(scenes []string, variants map[string][]variant, n, subject int) ([]trial, []trial, error) {
 	design := rand.New(rand.NewPCG(designSeed, 0))
 	pool := append([]string(nil), scenes...)
 	design.Shuffle(len(pool), func(i, j int) { pool[i], pool[j] = pool[j], pool[i] })
+	sort.SliceStable(pool, func(i, j int) bool { return len(variants[pool[i]]) > len(variants[pool[j]]) })
 	if len(pool) < nPractice+n {
 		return nil, nil, fmt.Errorf("asked for %d scenes plus %d practice, only %d in stimuli/ (use -n)",
 			n, nPractice, len(pool))
@@ -206,12 +222,25 @@ func buildTrials(scenes []string, variants map[string][]variant, n, subject int)
 		return t
 	}
 	var prac, main []trial
-	for _, s := range pool[:nPractice] {
+	for _, s := range pool[len(pool)-nPractice:] {
 		prac = append(prac, mk("practice", s))
 	}
-	rest := pool[nPractice:]
-	rng.Shuffle(len(rest), func(i, j int) { rest[i], rest[j] = rest[j], rest[i] })
-	for _, s := range rest[:n] {
+	// Weighted draw without replacement: the n largest keys u^(1/w).
+	type keyed struct {
+		scene string
+		key   float64
+	}
+	var cands []keyed
+	for _, s := range pool[:len(pool)-nPractice] {
+		cands = append(cands, keyed{s, math.Pow(rng.Float64(), 1/sceneWeight(len(variants[s])))})
+	}
+	sort.SliceStable(cands, func(i, j int) bool { return cands[i].key > cands[j].key })
+	chosen := make([]string, n)
+	for i := range chosen {
+		chosen[i] = cands[i].scene
+	}
+	rng.Shuffle(len(chosen), func(i, j int) { chosen[i], chosen[j] = chosen[j], chosen[i] })
+	for _, s := range chosen {
 		main = append(main, mk("main", s))
 	}
 	return prac, main, nil
