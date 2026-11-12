@@ -568,7 +568,8 @@ func showFeedback(exp *control.Experiment, b *stimuli.Picture, masks []*mask, re
 			n++
 		}
 	}
-	msg := fmt.Sprintf("Vous avez trouvé %d changement(s) sur %d. En rouge, ceux qui manquaient.", n, len(masks))
+	// Short: a TextLine is one line, and a long one runs off the 1024 px image.
+	msg := fmt.Sprintf("Trouvés : %d sur %d. En rouge, les changements ratés.", n, len(masks))
 	if n == len(masks) {
 		msg = "Bravo, vous les avez tous trouvés !"
 	}
@@ -634,6 +635,12 @@ func main() {
 	fix := stimuli.NewFixCross(30, 3, control.White)
 
 	err = exp.Run(func() error {
+		start := "Appuyez sur ESPACE pour commencer."
+		if *practice {
+			start = fmt.Sprintf("On commence par %d photos d'ENTRAÎNEMENT,\n"+
+				"avec la correction après chacune.\n\n"+
+				"Appuyez sur ESPACE pour commencer l'entraînement.", nPractice)
+		}
 		if err := exp.ShowInstructions(
 			"DÉTECTION DE CHANGEMENTS\n\n" +
 				"Une photo va clignoter entre deux versions.\n" +
@@ -644,7 +651,7 @@ func main() {
 				"chaque changement trouvé.\n\n" +
 				fmt.Sprintf("Vous avez %d secondes par photo.\n", *maxMs/1000) +
 				"Soyez rapide, mais ne cliquez pas au hasard.\n\n" +
-				"Appuyez sur ESPACE pour commencer."); err != nil {
+				start); err != nil {
 			return err
 		}
 
