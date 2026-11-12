@@ -1,0 +1,13 @@
+# built binaries (go build . names it after the module; build.sh uses -o)
+change_blindness
+change_blindness.exe
+Change-Blindness
+Change-Blindness.exe
+dist/
+_build/
+
+# working files of the stimulus pipeline and analyses: COCO download, Python
+# environment, LaMa weights, eye-tracking file (see README)
+build/
+__pycache__/
+*.pyc

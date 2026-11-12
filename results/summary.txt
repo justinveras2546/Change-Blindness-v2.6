@@ -1,0 +1,19 @@
+CHANGE BLINDNESS: 1 participant(s), 120 changes (40 photographs x 3 changes)
+  Saliency-Change-Blindness_sub-997_date-20261112-003858.csv
+  changes found: 101/120; clicks away from any change: 4
+  disappear: found 51/63, found first in 21 trials
+  colour   : found 50/57, found first in 19 trials
+  median time to find a change: 3026 ms
+  Within each photograph, is the change found first the one the model rates highest? (chance = 33 %)
+    resnet50  ratio    : 14/40 = 35 %
+    resnet50  feat_dist: 23/40 = 58 %
+    vit_b16   ratio    : 13/40 = 32 %
+    vit_b16   feat_dist: 24/40 = 60 %
+    largest object      : 19/40 = 48 %
+  resnet50  ratio     vs time to find (misses = time limit): Spearman rho = -0.18, p = 0.049, n = 120
+  resnet50  feat_dist vs time to find (misses = time limit): Spearman rho = -0.60, p = 0.000, n = 120
+  vit_b16   ratio     vs time to find (misses = time limit): Spearman rho = -0.00, p = 0.992, n = 120
+  vit_b16   feat_dist vs time to find (misses = time limit): Spearman rho = -0.56, p = 0.000, n = 120
+  main object: found 11/11
+  other objects: found 90/109
+

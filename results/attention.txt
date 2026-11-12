@@ -1,0 +1,35 @@
+Maps: vit = supervised ViT-B/16, dino = self-supervised ViT-B/16; cls = last-layer [CLS] attention, rollout = attention rollout
+
+PARTICIPANTS: 1 session(s), 40 trials, 120 changes
+  measure                 found first = top  rho time (area out)
+  dino_cls                14/40 =  35 %       -0.31      -0.28
+  dino_rollout            14/40 =  35 %       -0.22      -0.15
+  vit_cls                 18/40 =  45 %       -0.28      -0.16
+  vit_rollout             13/40 =  32 %       -0.06      -0.05
+  gradcam_resnet50        14/40 =  35 %       -0.18      -0.13
+  gradcam_vit_b16         13/40 =  32 %       -0.00      +0.02
+  featdist_resnet50       23/40 =  58 %       -0.60      -0.50
+  featdist_vit_b16        24/40 =  60 %       -0.56      -0.45
+  featdist_dino           24/40 =  60 %       -0.59      -0.49
+  featdist_dino_patches   20/40 =  50 %       -0.60      -0.51
+  (chance for 'found first = top' is 33 %; a negative rho = higher value, found sooner)
+
+EYE TRACKING (COCO-FreeView, 46 photographs): maps vs fixations
+  dino_cls               CC=+0.47  NSS=+1.03
+  centre_bias            CC=+0.42  NSS=+0.85
+  gradcam_resnet50       CC=+0.29  NSS=+0.56
+  dino_rollout           CC=+0.09  NSS=+0.18
+  gradcam_vit_b16        CC=+0.06  NSS=+0.08
+  vit_cls                CC=+0.01  NSS=+0.03
+  vit_rollout            CC=-0.15  NSS=-0.31
+  per changed object (198): share of fixations on it vs the map's value
+    dino_cls               rho=+0.40  (area out +0.37)
+    dino_rollout           rho=+0.27  (area out +0.15)
+    vit_cls                rho=+0.39  (area out +0.22)
+    vit_rollout            rho=+0.10  (area out +0.02)
+    gradcam_resnet50       rho=+0.25  (area out +0.16)
+    gradcam_vit_b16        rho=+0.16  (area out +0.18)
+    featdist_resnet50      rho=+0.48  (area out +0.09)
+    featdist_vit_b16       rho=+0.56  (area out +0.25)
+    featdist_dino          rho=+0.59  (area out +0.30)
+    featdist_dino_patches  rho=+0.53  (area out +0.15)

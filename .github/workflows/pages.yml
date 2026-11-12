@@ -1,0 +1,61 @@
+# Build the browser (WebAssembly) version and publish it on GitHub Pages.
+#
+# Enable it once in the repository: Settings -> Pages -> Source: GitHub Actions.
+# The page is then https://<account>.github.io/<repository>/
+#
+# The browser build needs the js/wasm bindings of go-sdl3, which live in the
+# fork github.com/chrplr/go-sdl3-wasm. The replace below is applied in CI only
+# (never committed): native builds keep using upstream go-sdl3. The fork
+# version is the one goxpyriment v0.20.2 itself pins.
+name: Deploy browser version to Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "data/**", "results/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Use the go-sdl3 fork with browser bindings (CI only)
+        run: |
+          go mod edit -replace github.com/Zyko0/go-sdl3=github.com/chrplr/go-sdl3-wasm@v0.1.2
+          go mod tidy
+
+      - name: Build the browser bundle
+        # wasmsdl (shipped in the fork) compiles main.wasm and writes it with
+        # wasm_exec.js, sdl.js and sdl.wasm next to web/index.html.
+        run: go run github.com/Zyko0/go-sdl3/cmd/wasmsdl build -html web/index.html -out dist .
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

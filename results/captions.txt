@@ -1,0 +1,33 @@
+46 scenes, 311 (scene, category) pairs, captions per scene: 5-5
+Mentioned in the captions: main object 67 % of captions, other objects 14 % (Mann-Whitney p = 7.5e-23)
+Other objects never mentioned: 180/265
+Examples:
+  s109390: A kitchen with white cabinets and stainless steel stove. | A stainless steel oven and microwave in a kitchen.
+     bottle=0.0, bowl=0.0, microwave=0.2, oven=0.4
+  s113205: A desktop computer on a desk with other types of things | A clean work area with a lit up desk.
+     cell phone=0.4, chair=0.0, keyboard=0.4, mouse=0.2, remote=0.0, tv=0.6
+  s114652: a table with a plate of food near a laptop | A desk area with two bowls and two laptops.
+     book=0.0, bottle=0.0, bowl=0.4, laptop=1.0, remote=0.0, spoon=0.0
+  s116556: A desk with a chair, laptop, two computer monitors, and a keyboard. | A desk with a laptop, keyboard and desktop monitor.
+     car=0.0, chair=0.4, cup=0.0, keyboard=0.6, laptop=1.0, mouse=0.0, tv=0.8
+
+Changed objects (198): caption importance vs the models
+  resnet50  Grad-CAM ratio: rho=+0.27 p=0.000121   area partialled out: +0.19
+  resnet50  feat_dist     : rho=+0.38 p=3.31e-08   area partialled out: +0.00
+  vit_b16   Grad-CAM ratio: rho=+0.13 p=0.0648   area partialled out: +0.14
+  vit_b16   feat_dist     : rho=+0.44 p=5.19e-11   area partialled out: +0.13
+  object area             : rho=+0.52 p=5.52e-15
+  other objects only (177):
+    resnet50  Grad-CAM ratio: rho=+0.24 p=0.00154   area partialled out: +0.19
+    resnet50  feat_dist     : rho=+0.20 p=0.00643   area partialled out: -0.02
+    vit_b16   Grad-CAM ratio: rho=+0.05 p=0.547   area partialled out: +0.08
+    vit_b16   feat_dist     : rho=+0.26 p=0.000401   area partialled out: +0.08
+
+Caption importance vs share of eye fixations (COCO-FreeView, 198 objects): rho=+0.45 p=2.83e-11   area partialled out: +0.21
+Caption importance vs time to find the change (120 changes): rho=-0.35 p=8.54e-05
+    mentioned in 0/5 captions: 74 changes, found 59, median time 4.4 s
+    mentioned in 1/5 captions: 20 changes, found 18, median time 3.6 s
+    mentioned in 2/5 captions: 12 changes, found 12, median time 1.0 s
+    mentioned in 3/5 captions:  5 changes, found 4, median time 3.1 s
+    mentioned in 4/5 captions:  5 changes, found 4, median time 2.5 s
+    mentioned in 5/5 captions:  4 changes, found 4, median time 1.5 s

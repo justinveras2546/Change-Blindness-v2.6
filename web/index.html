@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Change Blindness v2.6</title>
+    <style>
+      :root {
+        --bg: #1a1a1a;
+        --panel: #242424;
+        --fg: #e8e8e8;
+        --muted: #9a9a9a;
+        --accent: #4a9eff;
+        --border: #3a3a3a;
+      }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      body { display: flex; align-items: center; justify-content: center; }
+
+      #launcher {
+        max-width: 40rem;
+        margin: 1rem;
+        padding: 2rem 2.5rem;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        line-height: 1.5;
+      }
+      #launcher h1 { margin: 0 0 .25rem; font-size: 1.6rem; }
+      #launcher .sub { margin: 0 0 1.5rem; color: var(--muted); font-size: .9rem; }
+      #launcher h2 { font-size: 1rem; margin: 1.5rem 0 .5rem; }
+      #launcher ul { margin: .5rem 0; padding-left: 1.2rem; color: var(--muted); font-size: .9rem; }
+      #launcher li { margin: .3rem 0; }
+      a { color: var(--accent); }
+      kbd {
+        padding: .05em .4em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .9em;
+        color: var(--fg);
+        background: #1a1a1a;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+      }
+      .field { display: flex; align-items: center; gap: .75rem; margin: 1.5rem 0 1rem; flex-wrap: wrap; }
+      .field label { font-size: .95rem; }
+      .field input {
+        width: 7rem;
+        padding: .5rem .6rem;
+        font: inherit;
+        color: var(--fg);
+        background: #1a1a1a;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      button {
+        padding: .6rem 1.4rem;
+        font: inherit;
+        font-weight: 600;
+        color: #08121f;
+        background: var(--accent);
+        border: 0;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:disabled { background: #3a4550; color: var(--muted); cursor: default; }
+      #status { margin-top: 1rem; min-height: 1.2em; font-size: .85rem; color: var(--muted); }
+      #status.error { color: #ff7a7a; }
+      .warn {
+        margin-top: 1rem;
+        padding: .6rem .8rem;
+        font-size: .85rem;
+        color: #ffd48a;
+        background: #2e2717;
+        border: 1px solid #4a3d1c;
+        border-radius: 6px;
+      }
+
+      /* SDL's web backend takes the window size from the canvas CSS layout
+         size, so the canvas must be laid out (not display:none) when the Go
+         program creates its window: hidden with visibility until then. */
+      #canvas { display: block; outline: none; }
+      body.running #launcher { display: none; }
+      body:not(.running) #canvas { position: absolute; visibility: hidden; }
+
+      /* Once running, shrink the canvas to fit a small window. A uniform
+         transform keeps the clicks on target (Emscripten maps pointer events
+         through getBoundingClientRect). */
+      body.running { overflow: hidden; }
+      body.running #canvas { transform: scale(var(--fit, 1)); }
+
+      #focusHint {
+        display: none;
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        transform: translateX(-50%);
+        padding: .6rem 1rem;
+        font-size: .9rem;
+        color: #08121f;
+        background: var(--accent);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      body.running.unfocused #focusHint { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="launcher">
+      <h1>Change Blindness v2.6</h1>
+      <p class="sub">Expérience de détection de changements &mdash; fonctionne dans votre
+        navigateur (WebAssembly), réalisée avec
+        <a href="https://github.com/chrplr/goxpyriment">goxpyriment</a>.</p>
+
+      <p>Une photo va clignoter entre deux versions. Entre les deux, <strong>trois
+        objets changent</strong> : ils apparaissent, disparaissent ou changent de
+        couleur.</p>
+
+      <p><strong>Cliquez directement sur chaque changement</strong> dès que vous le
+        repérez ; un cadre vert confirme chaque changement trouvé. Vous avez
+        15&nbsp;secondes par photo. Il y a 2 photos d'entraînement, puis 40 photos
+        (environ 15&nbsp;minutes).</p>
+
+      <div class="field">
+        <label for="prenom">Prénom</label>
+        <input id="prenom" type="text" autocomplete="given-name" />
+        <label for="nom">Nom</label>
+        <input id="nom" type="text" autocomplete="family-name" />
+      </div>
+      <div class="field">
+        <button id="start" disabled>Chargement&hellip;</button>
+      </div>
+      <p class="sub">Votre nom sert seulement à l'expérimentateur pour savoir qui a
+        participé : il est enregistré dans le fichier d'informations de la session,
+        jamais dans le tableau des résultats.</p>
+
+      <div id="status">Chargement (environ 25&nbsp;Mo, quelques secondes)&hellip;</div>
+
+      <h2>Avant de commencer</h2>
+      <ul>
+        <li>Utilisez un <strong>ordinateur avec une souris</strong> (pas un téléphone),
+          dans un onglet au premier plan : les navigateurs ralentissent les onglets en
+          arrière-plan.</li>
+        <li>Mettez la fenêtre du navigateur <strong>en plein écran</strong>
+          (<kbd>F11</kbd>) et ne la redimensionnez plus pendant l'expérience.</li>
+        <li>Appuyez sur <kbd>ESPACE</kbd> pour passer chaque écran de consignes.
+          Si une touche semble ignorée, cliquez une fois sur l'image.</li>
+        <li>À la fin, le navigateur <strong>télécharge un fichier</strong>
+          <code>Change-Blindness-v2.6_sub-&lt;numéro de session&gt;_date-&hellip;.zip</code> :
+          c'est l'ensemble de vos résultats. Acceptez-le si le navigateur le demande.</li>
+        <li><strong>Envoyez ensuite ce fichier par e-mail à
+          <a href="mailto:justin.verastegui-munoz@polytechnique.fr?subject=R%C3%A9sultats%20Change%20Blindness%20v2.6">justin.verastegui-munoz@polytechnique.fr</a></strong>
+          (il se trouve en général dans votre dossier « Téléchargements »).</li>
+        <li><kbd>Échap</kbd> arrête l'expérience à tout moment.</li>
+      </ul>
+    </div>
+
+    <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
+    <div id="focusHint">Cliquez ici pour redonner le clavier à l'expérience</div>
+
+    <script>
+      const canvasElement = document.getElementById('canvas');
+      const startButton = document.getElementById('start');
+      const firstNameField = document.getElementById('prenom');
+      const lastNameField = document.getElementById('nom');
+      const statusLine = document.getElementById('status');
+      const launcher = document.getElementById('launcher');
+      const focusHint = document.getElementById('focusHint');
+
+      function setStatus(text, isError) {
+        statusLine.textContent = text;
+        statusLine.classList.toggle('error', !!isError);
+      }
+
+      // The subject ID seeds the draw of photographs and changes. The
+      // participant gives a name; the ID is a random number (or ?s=7 in the
+      // link, for the experimenter).
+      const linkSubject = new URLSearchParams(location.search).get('s');
+
+      // Without cross-origin isolation (GitHub Pages cannot send the headers),
+      // the browser clock ticks at ~0.1 ms instead of ~5 µs: harmless for
+      // detection times of seconds, but say so.
+      if (!window.crossOriginIsolated) {
+        const note = document.createElement('div');
+        note.className = 'warn';
+        note.innerHTML = 'Horloge du navigateur à résolution réduite (~0,1&nbsp;ms) : ' +
+          'sans conséquence pour des temps de détection de l’ordre de la seconde.';
+        launcher.appendChild(note);
+      }
+
+      canvasElement.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        setStatus('Le contexte graphique a été perdu. Rechargez la page pour recommencer.', true);
+      }, false);
+
+      // Emscripten module hosting SDL3: `Module` is the global sdl.js reads.
+      var Module = {
+        print(...args) { console.log(...args); },
+        printErr(...args) { console.error(...args); },
+        canvas: canvasElement,
+        onRuntimeInitialized() { sdlReady = true; maybeEnableStart(); },
+      };
+      let sdlReady = false;
+      let goReady = false;
+      function maybeEnableStart() {
+        if (!sdlReady || !goReady) return;
+        startButton.disabled = false;
+        startButton.textContent = 'Commencer';
+        setStatus('Prêt.');
+      }
+    </script>
+
+    <script src="sdl.js"></script>
+    <script src="wasm_exec.js"></script>
+    <script>
+      if (!WebAssembly.instantiateStreaming) {
+        WebAssembly.instantiateStreaming = async (resp, importObject) => {
+          const source = await (await resp).arrayBuffer();
+          return await WebAssembly.instantiate(source, importObject);
+        };
+      }
+
+      const go = new Go();
+      let goInstance = null;
+      WebAssembly.instantiateStreaming(fetch('main.wasm'), go.importObject)
+        .then((result) => { goInstance = result.instance; goReady = true; maybeEnableStart(); })
+        .catch((err) => {
+          console.error(err);
+          setStatus('Impossible de charger main.wasm : ' + err +
+            ' (la page doit être servie par un serveur web, pas ouverte comme fichier).', true);
+        });
+
+      startButton.addEventListener('click', () => {
+        const prenom = firstNameField.value.trim();
+        const nom = lastNameField.value.trim();
+        if (!prenom || !nom) {
+          setStatus('Entrez votre prénom et votre nom.', true);
+          (prenom ? lastNameField : firstNameField).focus();
+          return;
+        }
+        const id = /^\d+$/.test(linkSubject || '') ? linkSubject
+          : String(100000 + Math.floor(Math.random() * 900000));
+        startButton.disabled = true;
+
+        // The Go side reads its flags from location.search at startup.
+        const params = new URLSearchParams(location.search);
+        params.set('s', id);
+        params.set('prenom', prenom);
+        params.set('nom', nom);
+        history.replaceState(null, '', location.pathname + '?' + params.toString());
+
+        document.body.classList.add('running');
+        canvasElement.focus();
+        void canvasElement.offsetWidth; // force layout before SDL measures it
+
+        // Start Go on a fresh task, not inside this click handler: the program
+        // blocks its main goroutine for the whole session and the wasm
+        // scheduler can only park it from a fresh stack.
+        setTimeout(() => go.run(goInstance), 0);
+      });
+
+      // SPACE (instruction screens) only reaches SDL while the canvas has focus.
+      function trackFocus() {
+        document.body.classList.toggle('unfocused', document.activeElement !== canvasElement);
+      }
+      canvasElement.addEventListener('blur', trackFocus);
+      canvasElement.addEventListener('focus', trackFocus);
+      window.addEventListener('blur', trackFocus);
+      focusHint.addEventListener('click', () => { canvasElement.focus(); trackFocus(); });
+
+      // Shrink the canvas only when the window is too small to show it whole.
+      function fitCanvas() {
+        if (!document.body.classList.contains('running')) return;
+        const w = canvasElement.width || canvasElement.clientWidth;
+        const h = canvasElement.height || canvasElement.clientHeight;
+        if (!w || !h) return;
+        const fit = Math.min(1, window.innerWidth / w, window.innerHeight / h);
+        document.documentElement.style.setProperty('--fit', fit.toFixed(4));
+      }
+      window.addEventListener('resize', fitCanvas);
+      setInterval(fitCanvas, 500);
+      setInterval(trackFocus, 500);
+
+      for (const f of [firstNameField, lastNameField]) {
+        f.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !startButton.disabled) startButton.click();
+        });
+      }
+    </script>
+  </body>
+</html>

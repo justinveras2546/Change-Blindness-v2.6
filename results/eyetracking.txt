@@ -1,0 +1,202 @@
+COCO-FreeView: 4317 photographs; 46 of our 46 are among them: s6725, s29377, s43092, s44266, s52151, s63230, s65484, s68162, s78085, s87363, s109390, s113205, s114652, s116556, s117784, s129334, s139503, s177974, s201062, s209931, s216507, s236725, s245451, s256589, s259951, s262054, s270096, s273103, s273336, s275795, s294330, s322407, s326210, s329762, s331541, s354746, s400592, s409855, s419908, s421791, s429793, s472925, s510652, s511430, s559639, s561894
+
+Maps vs fixation density, per photograph (CC; NSS):
+  s6725 (139 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.25  NSS=+0.48
+    vit_b16 (classe prédite)     CC=-0.14  NSS=-0.34
+    biais central                CC=+0.46  NSS=+0.90
+  s29377 (171 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.10  NSS=+0.28
+    vit_b16 (classe prédite)     CC=+0.00  NSS=-0.03
+    biais central                CC=+0.19  NSS=+0.65
+  s43092 (146 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.34  NSS=+0.65
+    vit_b16 (classe prédite)     CC=-0.05  NSS=-0.08
+    biais central                CC=+0.44  NSS=+0.83
+  s44266 (148 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.23  NSS=+0.43
+    vit_b16 (classe prédite)     CC=-0.11  NSS=-0.26
+    biais central                CC=+0.38  NSS=+0.73
+  s52151 (154 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.14  NSS=+0.23
+    vit_b16 (classe prédite)     CC=+0.06  NSS=+0.11
+    biais central                CC=+0.20  NSS=+0.33
+  s63230 (139 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.27  NSS=+0.54
+    vit_b16 (classe prédite)     CC=+0.06  NSS=+0.13
+    biais central                CC=+0.38  NSS=+0.76
+  s65484 (133 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.09  NSS=+0.20
+    vit_b16 (classe prédite)     CC=+0.28  NSS=+0.63
+    biais central                CC=+0.48  NSS=+0.97
+  s68162 (148 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.37  NSS=+0.59
+    vit_b16 (classe prédite)     CC=-0.25  NSS=-0.43
+    biais central                CC=+0.54  NSS=+0.88
+  s78085 (163 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.35  NSS=+0.67
+    vit_b16 (classe prédite)     CC=+0.02  NSS=+0.00
+    biais central                CC=+0.46  NSS=+0.89
+  s87363 (148 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.24  NSS=+0.42
+    vit_b16 (classe prédite)     CC=+0.38  NSS=+0.72
+    biais central                CC=+0.64  NSS=+1.17
+  s109390 (147 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.31  NSS=+0.59
+    vit_b16 (classe prédite)     CC=+0.21  NSS=+0.34
+    biais central                CC=+0.46  NSS=+0.84
+  s113205 (156 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.21  NSS=+0.47
+    vit_b16 (classe prédite)     CC=-0.09  NSS=-0.27
+    biais central                CC=+0.24  NSS=+0.55
+  s114652 (170 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.24  NSS=+0.46
+    vit_b16 (classe prédite)     CC=+0.06  NSS=+0.07
+    biais central                CC=+0.33  NSS=+0.64
+  s116556 (147 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.54  NSS=+1.03
+    vit_b16 (classe prédite)     CC=+0.16  NSS=+0.25
+    biais central                CC=+0.47  NSS=+0.90
+  s117784 (151 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.30  NSS=+0.56
+    vit_b16 (classe prédite)     CC=+0.12  NSS=+0.18
+    biais central                CC=+0.40  NSS=+0.75
+  s129334 (139 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.30  NSS=+0.64
+    vit_b16 (classe prédite)     CC=+0.16  NSS=+0.26
+    biais central                CC=+0.44  NSS=+0.91
+  s139503 (167 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.34  NSS=+0.58
+    vit_b16 (classe prédite)     CC=+0.21  NSS=+0.28
+    biais central                CC=+0.51  NSS=+0.88
+  s177974 (147 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.47  NSS=+0.82
+    vit_b16 (classe prédite)     CC=-0.05  NSS=-0.10
+    biais central                CC=+0.50  NSS=+0.88
+  s201062 (166 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.20  NSS=+0.43
+    vit_b16 (classe prédite)     CC=+0.16  NSS=+0.31
+    biais central                CC=+0.44  NSS=+1.10
+  s209931 (145 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.09  NSS=+0.20
+    vit_b16 (classe prédite)     CC=+0.04  NSS=-0.00
+    biais central                CC=+0.32  NSS=+0.63
+  s216507 (148 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=-0.16  NSS=-0.45
+    vit_b16 (classe prédite)     CC=-0.15  NSS=-0.44
+    biais central                CC=+0.29  NSS=+0.75
+  s236725 (159 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=-0.06  NSS=-0.11
+    vit_b16 (classe prédite)     CC=+0.18  NSS=+0.28
+    biais central                CC=+0.56  NSS=+0.91
+  s245451 (157 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.56  NSS=+1.17
+    vit_b16 (classe prédite)     CC=+0.08  NSS=+0.10
+    biais central                CC=+0.52  NSS=+1.04
+  s256589 (159 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.46  NSS=+0.79
+    vit_b16 (classe prédite)     CC=-0.01  NSS=-0.04
+    biais central                CC=+0.60  NSS=+1.02
+  s259951 (145 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.08  NSS=+0.16
+    vit_b16 (classe prédite)     CC=-0.41  NSS=-0.92
+    biais central                CC=+0.55  NSS=+1.20
+  s262054 (142 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.44  NSS=+0.97
+    vit_b16 (classe prédite)     CC=+0.11  NSS=+0.10
+    biais central                CC=+0.41  NSS=+0.86
+  s270096 (141 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.24  NSS=+0.62
+    vit_b16 (classe prédite)     CC=-0.01  NSS=-0.13
+    biais central                CC=+0.31  NSS=+0.78
+  s273103 (174 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.55  NSS=+1.32
+    vit_b16 (classe prédite)     CC=-0.03  NSS=-0.20
+    biais central                CC=+0.56  NSS=+1.32
+  s273336 (145 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.26  NSS=+0.50
+    vit_b16 (classe prédite)     CC=+0.11  NSS=+0.17
+    biais central                CC=+0.41  NSS=+0.83
+  s275795 (163 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.26  NSS=+0.45
+    vit_b16 (classe prédite)     CC=-0.16  NSS=-0.32
+    biais central                CC=+0.41  NSS=+0.72
+  s294330 (151 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.47  NSS=+0.79
+    vit_b16 (classe prédite)     CC=+0.22  NSS=+0.42
+    biais central                CC=+0.45  NSS=+0.75
+  s322407 (157 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.51  NSS=+1.25
+    vit_b16 (classe prédite)     CC=+0.28  NSS=+0.67
+    biais central                CC=+0.47  NSS=+1.16
+  s326210 (152 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.36  NSS=+0.75
+    vit_b16 (classe prédite)     CC=-0.25  NSS=-0.58
+    biais central                CC=+0.44  NSS=+0.91
+  s329762 (162 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.08  NSS=+0.13
+    vit_b16 (classe prédite)     CC=+0.05  NSS=+0.11
+    biais central                CC=+0.25  NSS=+0.47
+  s331541 (146 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.39  NSS=+0.98
+    vit_b16 (classe prédite)     CC=+0.18  NSS=+0.39
+    biais central                CC=+0.47  NSS=+1.17
+  s354746 (142 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.50  NSS=+0.78
+    vit_b16 (classe prédite)     CC=+0.42  NSS=+0.66
+    biais central                CC=+0.51  NSS=+0.81
+  s400592 (139 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.59  NSS=+1.11
+    vit_b16 (classe prédite)     CC=+0.31  NSS=+0.54
+    biais central                CC=+0.57  NSS=+1.06
+  s409855 (135 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.22  NSS=+0.46
+    vit_b16 (classe prédite)     CC=+0.06  NSS=+0.11
+    biais central                CC=+0.29  NSS=+0.58
+  s419908 (139 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.24  NSS=+0.49
+    vit_b16 (classe prédite)     CC=+0.09  NSS=+0.19
+    biais central                CC=+0.25  NSS=+0.50
+  s421791 (145 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.36  NSS=+0.74
+    vit_b16 (classe prédite)     CC=+0.26  NSS=+0.47
+    biais central                CC=+0.49  NSS=+1.02
+  s429793 (157 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.47  NSS=+0.86
+    vit_b16 (classe prédite)     CC=-0.06  NSS=-0.22
+    biais central                CC=+0.48  NSS=+0.87
+  s472925 (140 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.28  NSS=+0.45
+    vit_b16 (classe prédite)     CC=-0.29  NSS=-0.53
+    biais central                CC=+0.48  NSS=+0.80
+  s510652 (157 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.25  NSS=+0.58
+    vit_b16 (classe prédite)     CC=+0.02  NSS=+0.06
+    biais central                CC=+0.30  NSS=+0.70
+  s511430 (135 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.56  NSS=+1.05
+    vit_b16 (classe prédite)     CC=+0.43  NSS=+0.77
+    biais central                CC=+0.51  NSS=+0.93
+  s559639 (142 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=+0.03  NSS=+0.06
+    vit_b16 (classe prédite)     CC=-0.06  NSS=-0.19
+    biais central                CC=+0.25  NSS=+0.82
+  s561894 (148 fixations, 10 observers)
+    resnet50 (classe prédite)    CC=-0.10  NSS=-0.30
+    vit_b16 (classe prédite)     CC=+0.13  NSS=+0.29
+    biais central                CC=+0.30  NSS=+0.72
+  mean over photographs:
+    resnet50 (classe prédite)    CC=+0.29  NSS=+0.56  (n=46)
+    vit_b16 (classe prédite)     CC=+0.06  NSS=+0.08  (n=46)
+    biais central                CC=+0.42  NSS=+0.85  (n=46)
+
+Per object (198 changed objects in these photographs):
+  share of fixations vs resnet50 ratio    : Spearman rho=+0.25 p=0.000   object area partialled out: +0.16
+  share of fixations vs resnet50 feat_dist: Spearman rho=+0.48 p=0.000   object area partialled out: +0.09
+  share of fixations vs vit_b16 ratio    : Spearman rho=+0.16 p=0.025   object area partialled out: +0.18
+  share of fixations vs vit_b16 feat_dist: Spearman rho=+0.56 p=0.000   object area partialled out: +0.25
+  share of fixations vs object area      : Spearman rho=+0.59 p=0.000
+
+Participants (change blindness, 3 changes per trial): 120 changed objects shown
+  share of fixations vs median time to find it: Spearman rho=-0.41 p=0.000   area partialled out: -0.26
+  the change found first is the most fixated of the 3 in 21/40 trials (52 %, chance 33 %)

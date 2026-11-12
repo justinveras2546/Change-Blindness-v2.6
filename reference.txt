@@ -1,0 +1,7 @@
+Rensink, R. A., O’Regan, J. K., & Clark, J. J. (1997). To see or not to see: The need for attention to perceive changes in scenes. Psychological Science, 8, 368–373.
+Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., Dollár, P., & Zitnick, C. L. (2014). Microsoft COCO: Common objects in context. ECCV 2014, 740–755.
+Suvorov, R., et al. (2022). Resolution-robust large mask inpainting with Fourier convolutions. WACV 2022, 2149–2159.
+
+Chen, Y., Yang, Z., Chakraborty, S., Mondal, S., Ahn, S., Samaras, D., Hoai, M.,
+& Zelinsky, G. (2022). Characterizing target-absent human attention.
+CVPR Workshops 2022 (COCO-FreeView eye-tracking data).
