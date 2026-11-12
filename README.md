@@ -40,42 +40,6 @@ Data files (`Change-Blindness-v2.6_sub-<id>_date-….csv`) are written to
 `-info.txt` files, which hold the computer's user and host names) to `data/`
 to analyse them.
 
-## Running in a browser
-
-The same program runs in a web page (WebAssembly), so participants only need
-a link. `.github/workflows/pages.yml` builds it and publishes it on GitHub
-Pages on every push to `main`: enable it once in the repository with
-*Settings → Pages → Source: GitHub Actions*. The page is then
-`https://<account>.github.io/<repository>/`.
-
-- The page (`web/index.html`) gives the instructions in French and asks for
-  the participant's **first and last name**. The subject ID that seeds the
-  draw of photographs and changes is a random 6-digit number picked by the
-  page (or `?s=12` in the link, to force one).
-- The name is passed to the program as `-prenom` / `-nom` and recorded **only
-  in the session's `-info.txt`** (`participant_nom:`, `participant_prenom:`),
-  never in the `.csv`. Keep the `-info.txt` files private (they are not in
-  `data/`): they are the only link between a name and a subject ID.
-- At the end, the browser downloads one file,
-  `Change-Blindness-v2.6_sub-<id>_date-….zip`, with the `.csv` and the
-  `-info.txt`. The page and the end screen ask participants to e-mail it to
-  justin.verastegui-munoz@polytechnique.fr (`contactEmail` in `main.go`).
-- Timing follows the screen refresh (requestAnimationFrame); GitHub Pages
-  cannot send the cross-origin-isolation headers, so the clock resolution is
-  about 0.1 ms, which does not matter for detection times of seconds.
-
-To try the browser version locally before pushing (it needs the go-sdl3 fork
-with the browser bindings, which the workflow adds in CI only):
-
-```bash
-go mod edit -replace github.com/Zyko0/go-sdl3=github.com/chrplr/go-sdl3-wasm@v0.1.2
-go mod tidy
-go run github.com/Zyko0/go-sdl3/cmd/wasmsdl serve -html web/index.html .
-# open http://localhost:8080/?s=1, then undo the replace before committing:
-go mod edit -dropreplace github.com/Zyko0/go-sdl3
-go mod tidy
-```
-
 
 ## Stimuli
 
