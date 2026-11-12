@@ -69,7 +69,7 @@ const (
 	expName = "Change-Blindness-v2.6" // window title and data file names
 
 	// contactEmail is where browser participants send their results.
-	contactEmail = "justin.verastegui-munoz@polytechnique.fr"
+	contactEmail = "justin.verastegui-munoz@polytechnique.edu"
 	stimDir      = "stimuli"
 
 	imageW = 1024 // every stimulus image and mask is 1024×768
