@@ -164,6 +164,12 @@ go to `build/saliency_overlays/`.
   fewest changes (3). `-n` sets how many scenes are drawn.
 - **For each scene, 3 of its variants are drawn at random**, any type, a
   different set for each participant when the scene has more than 3.
+  **Big changes** (the main object, or an object covering more than 2.5 % of
+  the photograph: 33 of the 198 variants) are found by nearly everyone, first,
+  in about a second, so they are drawn with a quarter of the weight of the
+  others (`bigWeight`): 9 % of the changes shown instead of 17 %, and at least
+  one in 27 % of the photos instead of 46 %. The `main_object` and
+  `mask_area` columns identify them in the data.
 - Whether the original or the changed version comes first in the cycle is
   random (for an erased object: it disappears or appears).
 - Every draw is seeded by the subject ID: the same ID reproduces the session.

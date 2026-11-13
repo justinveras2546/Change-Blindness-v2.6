@@ -143,6 +143,52 @@ func TestManifestAndDesign(t *testing.T) {
 	}
 }
 
+// Big changes stay possible but come up less often than with a uniform draw.
+func TestBigChangesLessOften(t *testing.T) {
+	scenes, variants, err := readManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	nBig, nAll := 0, 0
+	for _, s := range scenes {
+		for _, v := range variants[s] {
+			nAll++
+			if v.big() {
+				nBig++
+			}
+		}
+	}
+	shown, shownBig, trialsWithBig := 0, 0, 0
+	const subjects = 400
+	for s := 1; s <= subjects; s++ {
+		_, m, _ := buildTrials(scenes, variants, *nTrials, s)
+		for _, tr := range m {
+			big := 0
+			for _, v := range tr.changes {
+				shown++
+				if v.big() {
+					big++
+				}
+			}
+			shownBig += big
+			if big > 0 {
+				trialsWithBig++
+			}
+		}
+	}
+	trials := subjects * *nTrials
+	t.Logf("big changes: %d of %d variants (%.0f %%); %.0f %% of the changes shown; at least one in %.0f %% of the photos",
+		nBig, nAll, 100*float64(nBig)/float64(nAll), 100*float64(shownBig)/float64(shown),
+		100*float64(trialsWithBig)/float64(trials))
+	if shownBig == 0 {
+		t.Error("big changes are never shown")
+	}
+	// A uniform draw would show them at about their share of the variants.
+	if float64(shownBig)/float64(shown) >= float64(nBig)/float64(nAll) {
+		t.Error("big changes are not shown less often than their share of the variants")
+	}
+}
+
 // The original and the changed version must be identical outside the
 // changed regions, or the flicker would show more than the 3 changes.
 func TestComposeOnlyChangesRegions(t *testing.T) {

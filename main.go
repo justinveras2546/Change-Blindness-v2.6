@@ -112,6 +112,25 @@ type variant struct {
 	main      bool   // the changed object is the scene's main object
 	change    string // "colour" or "disappear"
 	px, py    int    // position of the patch in the photograph
+	area      int    // area of the changed object, in pixels
+}
+
+// A "big" change (the main object, or an object covering more than bigShare
+// of the photograph) is found by nearly everyone, first, in about a second:
+// it makes the task easy and says little. Big changes stay in the draw, but
+// bigWeight times as likely as the others to be among the 3 of a trial.
+const (
+	bigShare  = 0.025
+	bigWeight = 0.25
+)
+
+func (v variant) big() bool { return v.main || float64(v.area) > bigShare*imageW*imageH }
+
+func changeWeight(v variant) float64 {
+	if v.big() {
+		return bigWeight
+	}
+	return 1
 }
 
 func (v variant) patch() string  { return path.Join(stimDir, v.scene, v.id+"_patch.jpg") }
@@ -147,7 +166,7 @@ func readManifest() (scenes []string, variants map[string][]variant, err error) 
 	for i, name := range recs[0] {
 		col[name] = i
 	}
-	for _, name := range []string{"scene", "variant", "object", "main", "change", "patch_x", "patch_y"} {
+	for _, name := range []string{"scene", "variant", "object", "main", "change", "area_px", "patch_x", "patch_y"} {
 		if _, ok := col[name]; !ok {
 			return nil, nil, fmt.Errorf("manifest has no %q column", name)
 		}
@@ -157,6 +176,9 @@ func readManifest() (scenes []string, variants map[string][]variant, err error) 
 		v := variant{
 			scene: r[col["scene"]], id: r[col["variant"]], object: r[col["object"]],
 			main: r[col["main"]] == "1", change: r[col["change"]],
+		}
+		if _, err := fmt.Sscan(r[col["area_px"]], &v.area); err != nil {
+			return nil, nil, fmt.Errorf("manifest row %s/%s: area_px: %w", v.scene, v.id, err)
 		}
 		if _, err := fmt.Sscan(r[col["patch_x"]], &v.px); err != nil {
 			return nil, nil, fmt.Errorf("manifest row %s/%s: patch_x: %w", v.scene, v.id, err)
@@ -196,7 +218,8 @@ func sceneWeight(nVariants int) float64 { return float64(nVariants - nChanges + 
 // order) are the practice, the same for everyone. The n main scenes are drawn
 // at random for each subject among the others, without replacement, each with
 // a probability proportional to sceneWeight (Efraimidis & Spirakis, 2006),
-// and shown in random order with a random set of 3 changes in each.
+// and shown in random order with a random set of 3 changes in each (big
+// changes less likely, see changeWeight).
 func buildTrials(scenes []string, variants map[string][]variant, n, subject int) ([]trial, []trial, error) {
 	design := rand.New(rand.NewPCG(designSeed, 0))
 	pool := append([]string(nil), scenes...)
@@ -209,8 +232,16 @@ func buildTrials(scenes []string, variants map[string][]variant, n, subject int)
 
 	rng := rand.New(rand.NewPCG(uint64(subject), designSeed))
 	mk := func(phase, s string) trial {
+		// 3 changes drawn without replacement, big ones less likely
+		// (changeWeight): the 3 largest keys u^(1/w).
 		vs := variants[s]
-		perm := rng.Perm(len(vs))[:nChanges]
+		keys := make([]float64, len(vs))
+		idx := make([]int, len(vs))
+		for k, v := range vs {
+			keys[k], idx[k] = math.Pow(rng.Float64(), 1/changeWeight(v)), k
+		}
+		sort.SliceStable(idx, func(a, b int) bool { return keys[idx[a]] > keys[idx[b]] })
+		perm := idx[:nChanges]
 		sort.Ints(perm)
 		t := trial{phase: phase, scene: s}
 		for _, k := range perm {
